@@ -5,3 +5,12 @@
 <form [formGroup]="form">
   <input type="text" id="search" formControlName="search">
 </form>
+<div>
+  <label>{{user.name}}</label>
+  <img [src]="user.avatar_url" />
+</div>
+
+<div *ngFor="let follow of user.followers">
+  <label>{{follow.login}}</label>
+  <img src="{{follow.avatar_url}}" />
+</div>

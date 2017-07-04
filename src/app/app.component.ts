@@ -17,6 +17,9 @@ import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/finally';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/timeout';
+import { GitHubService } from './git-hub.service';
+import { User } from './user';
+import { Followers } from './followers';
 
 
 
@@ -28,8 +31,9 @@ import 'rxjs/add/operator/timeout';
 export class AppComponent {
   title = 'app works!';
   form: FormGroup;
+  user: User = null;
 
-  constructor(fb: FormBuilder) {
+  constructor(fb: FormBuilder, gitHubService: GitHubService) {
     //    var element = $("#search");
     //var observable = Observable.fromEvent(element, "keyup");
     this.form = fb.group({ search: [] });
@@ -83,13 +87,26 @@ export class AppComponent {
     var remoteStream = Observable.of([90, 87, 7]).delay(5000);
     remoteStream.timeout(1000).subscribe(x => console.log(x), err => console.error(err));
 
-    Observable.from([56, 22, 60]).subscribe(x => console.log(x), error => console.error(error), 
-    () => console.log("completado"));
+    Observable.from([56, 22, 60]).subscribe(x => console.log(x), error => console.error(error),
+      () => console.log("completado"));
 
     Observable.throw(new Error("ERO SENNIN"))
-     .finally(() => console.log("finally"))
-     .subscribe(x => console.log(x), 
-    error => console.log(error),
-    () => console.log("completado 2"));
+      .finally(() => console.log("finally"))
+      .subscribe(x => console.log(x),
+      error => console.log(error),
+      () => console.log("completado 2"));
+
+    Observable.forkJoin(gitHubService.getUser(), gitHubService.getFollowers())
+      .map(result => {
+        var user = new User();
+        user.login = result[0].login;
+        user.name = result[0].name;
+        user.avatar_url = result[0].avatar_url;
+        user.followers = result[1];
+        return user;
+      })
+      .subscribe(result =>
+        this.user = result
+      );
   }
 }
